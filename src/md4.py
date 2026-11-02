@@ -58,14 +58,17 @@ class MacroProcessor:
                 fpath = self.search_file(file)
                 with open(fpath, 'r', encoding='utf-8') as infile:
                         for line in infile:
-                                read_lines.append(line)
+                                read_lines += self.translate_line(line)
                 return read_lines
 
         def read_stdin(self):
                 read_lines = []
                 for line in sys.stdin:
-                        read_lines.append(line)                        
+                        read_lines += self.translate_line(line)
                 return read_lines
+
+        def translate_line(self, line):
+                return [ line ]
         
         def search_file(self, file):
                 if os.path.exists(file):
