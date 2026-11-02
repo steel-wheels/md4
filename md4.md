@@ -16,7 +16,7 @@ Process macros in text files (FILEs). The following string presents the md4 macr
 ```
 `p0`, `p1`, ... are parameters for macro. The number of required parameters are defined for each macros which is decided by `macro_name`.
 
-The macro is replaced by the result of macro execution.
+The macro is replaced by the result of macro evaluation.
 For example the `@work_dir()` macro will be replaced by the path of the directory where the `md4` command executed.
 
 input:
