@@ -1,0 +1,3 @@
+A
+@include(test_0.txt)
+B

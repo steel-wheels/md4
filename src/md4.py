@@ -13,11 +13,11 @@ class MacroProcessor:
                 curdir = os.getcwd()
                 self.include_dirs       = [curdir]  
                 self.input_files        = []
-                self.current_directries = [curdir]
+                self.current_path       = ["."]
                 self.output_file        = None
 
                 # regular expression for macro call
-                macroexp = r'@([^@()]+)\(([^@()]*)\)'
+                macroexp = r'@(\w+)\(([^@()]*)\)'
                 self.macro_pat = re.compile(macroexp)
 
         def exec(self):
@@ -35,7 +35,7 @@ class MacroProcessor:
                 # store results
                 if args.includes is not None:
                         for path in args.includes:
-                                if os.path.exists(path):
+                                if os.path.isdir(path):
                                         self.include_dirs.append(path)
                                 else:
                                         print(f'Error: include dir \"{path}\" is not found', file=sys.stderr)
@@ -73,6 +73,7 @@ class MacroProcessor:
                 return read_lines
 
         def translate_line(self, line):
+                # print(f'***** translate_line({line})')
                 matchres = re.search(self.macro_pat, line)
                 if matchres is not None:
                         before  = line[:matchres.start()]
@@ -84,27 +85,63 @@ class MacroProcessor:
                         mlen    = len(middles)
                         if mlen == 0:
                                 # evaluation result: none -> ignore it
-                                return [ before + after ]
+                                newline = before + after
+                                return self.translate_line(newline)
                         elif mlen == 1:
                                 # evaluation result: one line -> connect it
-                                return [ before + middles[0] + after ]
+                                newline = before + middles[0] + after
+                                return self.translate_line(newline)
                         else:
                                 # evaluation result: two line or more -> prepend and append it
                                 middles.insert(0, before)
                                 middles.append(after)       
-                                return middles
+                                return self.translate_lines(middles)
                 else:
                         return [ line ]
 
+        def translate_lines(self, lines):
+                result = []
+                for line in lines:
+                        result += self.translate_line(line)
+                return result
+        
         def evaluate_macro(self, mname, mparam):
-                return ["!@" + mname + "(" + mparam + ")!" ]           
+                if mparam:
+                        params = mparam.split(',')
+                else:
+                        params = []
+                if mname == "work_dir":
+                        if len(params) == 0:
+                                return [ self.current_path[-1] ]
+                        else:
+                                print(f'Error: work_dir macro has no parameters', file=sys.stderr)
+                                sys.exit(1)
+                elif mname == "include":
+                        if len(params) == 1:
+                                return self.insert_file(params[0])
+                        else:
+                                print(f'Error: include macro requires one parameter', file=sys.stderr)
+                                sys.exit(1)
+                else:
+                        print(f'Error: unknown macro: {mname}', file=sys.stderr)
+                        sys.exit(1)
+                        
+                return ["!" + mname + "!" + mparam + "!" ]           
+
+        def insert_file(self, filename):
+                fpath = self.search_file(filename)
+                read_lines = []
+                with open(fpath, 'r', encoding='utf-8') as infile:
+                        for line in infile:
+                                read_lines += self.translate_line(line)
+                return read_lines
 
         def search_file(self, file):
-                if os.path.exists(file):
+                if os.path.isfile(file):
                         return file
                 for path in self.include_dirs:
                         fpath = path + "/" + file
-                        if os.path.exists(fpath):
+                        if os.path.isfile(fpath):
                                 return fpath
                 print(f'Error: file \"{file}\" is not found', file=sys.stderr)
                 sys.exit(1)
