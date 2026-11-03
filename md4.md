@@ -9,6 +9,13 @@ md4 [OPTIONs]  FILEs
 ```
 
 ## DESCRIPTION
+### Commandline option
+#### `--include dir`
+Append `dir` to include pathes
+
+#### `--output file`
+The file to write the output
+
 ### Macro
 Process macros in text files (FILEs). The following string presents the md4 macro:
 ```
@@ -17,7 +24,7 @@ Process macros in text files (FILEs). The following string presents the md4 macr
 `p0`, `p1`, ... are parameters for macro. The number of required parameters are defined for each macros which is decided by `macro_name`.
 
 The macro is replaced by the result of macro evaluation.
-For example the `@work_dir()` macro will be replaced by the path of the directory where the `md4` command executed.
+For example the `@work_dir()` macro will be replaced by the relative path against the directory where the `md4` command executed.
 
 input:
 ```
@@ -34,7 +41,7 @@ Replace this macro by the contents of file in `file_path`. The md4 command searc
 * Relative path from the work directory.
 
 #### `@workdir()`
-The path of the directory where the `md4` command is executed.
+The relative path against the directory where the `md4` command is executed.
 
 ##  AUTHOR
 [Steel Wheels Project](https://github.com/steel-wheels/Project/blob/main/README.md)

@@ -1,0 +1,5 @@
+a
+A@work_dir()B
+A@include(@work_dir())B
+c
+

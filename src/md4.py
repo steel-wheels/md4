@@ -4,6 +4,7 @@
 
 import sys
 import os
+import re
 import argparse
 
 class MacroProcessor:
@@ -14,6 +15,10 @@ class MacroProcessor:
                 self.input_files        = []
                 self.current_directries = [curdir]
                 self.output_file        = None
+
+                # regular expression for macro call
+                macroexp = r'@([^@()]+)\(([^@()]*)\)'
+                self.macro_pat = re.compile(macroexp)
 
         def exec(self):
                 self.parseArguments()
@@ -68,8 +73,32 @@ class MacroProcessor:
                 return read_lines
 
         def translate_line(self, line):
-                return [ line ]
-        
+                matchres = re.search(self.macro_pat, line)
+                if matchres is not None:
+                        before  = line[:matchres.start()]
+                        mname   = matchres.group(1)
+                        mparam  = matchres.group(2)
+                        after   = line[matchres.end():]
+
+                        middles = self.evaluate_macro(mname, mparam)
+                        mlen    = len(middles)
+                        if mlen == 0:
+                                # evaluation result: none -> ignore it
+                                return [ before + after ]
+                        elif mlen == 1:
+                                # evaluation result: one line -> connect it
+                                return [ before + middles[0] + after ]
+                        else:
+                                # evaluation result: two line or more -> prepend and append it
+                                middles.insert(0, before)
+                                middles.append(after)       
+                                return middles
+                else:
+                        return [ line ]
+
+        def evaluate_macro(self, mname, mparam):
+                return ["!@" + mname + "(" + mparam + ")!" ]           
+
         def search_file(self, file):
                 if os.path.exists(file):
                         return file
