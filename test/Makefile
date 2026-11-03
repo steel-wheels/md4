@@ -1,7 +1,7 @@
 
 MD4_CMD	= python3 ../src/md4.py
 
-all: test0 test1 test2
+all: test0 test1 test2 test3
 
 clean:
 	rm -f *.tmp
@@ -22,6 +22,11 @@ test2: dummy
 	$(MD4_CMD) test_2.txt | tee test_2.txt.tmp
 	diff test_2.txt.tmp test_2.exp
 	rm test_2.txt.tmp
+
+test3: dummy
+	$(MD4_CMD) --output test_3.txt.tmp test_3.txt
+	diff test_3.txt.tmp test_3.exp
+	rm test_3.txt.tmp
 
 dummy:
 	

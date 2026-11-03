@@ -11,7 +11,7 @@ class MacroProcessor:
         def __init__(self):
                 # properties
                 curdir = os.getcwd()
-                self.include_dirs       = [curdir]  
+                self.include_dirs       = [curdir]
                 self.input_files        = []
                 self.current_path       = ["."]
                 self.output_file        = None
@@ -46,7 +46,11 @@ class MacroProcessor:
                 else:
                         self.input_files = []
                 if args.output is not None:
-                        self.output_file = args.output
+                        if len(args.output) == 1:
+                                self.output_file = args.output[0]
+                        else:
+                                print(f'Error: invalid output file: {args.output}', file=sys.stderr)
+                                sys.exit(1)
 
         def execute(self):
                 output_lines = []
@@ -94,7 +98,7 @@ class MacroProcessor:
                         else:
                                 # evaluation result: two line or more -> prepend and append it
                                 middles.insert(0, before)
-                                middles.append(after)       
+                                middles.append(after)
                                 return self.translate_lines(middles)
                 else:
                         return [ line ]
@@ -104,7 +108,7 @@ class MacroProcessor:
                 for line in lines:
                         result += self.translate_line(line)
                 return result
-        
+
         def evaluate_macro(self, mname, mparam):
                 if mparam:
                         params = mparam.split(',')
@@ -125,15 +129,16 @@ class MacroProcessor:
                 else:
                         print(f'Error: unknown macro: {mname}', file=sys.stderr)
                         sys.exit(1)
-                        
-                return ["!" + mname + "!" + mparam + "!" ]           
 
         def insert_file(self, filename):
                 fpath = self.search_file(filename)
+                dpath = os.path.dirname(fpath)
                 read_lines = []
+                self.current_path.append(dpath)
                 with open(fpath, 'r', encoding='utf-8') as infile:
                         for line in infile:
                                 read_lines += self.translate_line(line)
+                self.current_path.pop() # remove last element
                 return read_lines
 
         def search_file(self, file):

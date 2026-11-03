@@ -1,3 +1,3 @@
 #!/bin/bash
-python3 md4.py $*
+python3 /usr/local/libexec/md4.py $*
 
