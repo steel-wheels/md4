@@ -122,7 +122,7 @@ class MacroProcessor:
                                 sys.exit(1)
                 elif mname == "include":
                         if len(params) == 1:
-                                return self.insert_file(params[0])
+                                return self.include_file(params[0])
                         else:
                                 print(f'Error: include macro requires one parameter', file=sys.stderr)
                                 sys.exit(1)
@@ -130,7 +130,7 @@ class MacroProcessor:
                         print(f'Error: unknown macro: {mname}', file=sys.stderr)
                         sys.exit(1)
 
-        def insert_file(self, filename):
+        def include_file(self, filename):
                 fpath = self.search_file(filename)
                 dpath = os.path.dirname(fpath)
                 read_lines = []
@@ -142,8 +142,10 @@ class MacroProcessor:
                 return read_lines
 
         def search_file(self, file):
-                if os.path.isfile(file):
-                        return file
+                if len(self.current_path) > 0:
+                        fpath = self.current_path[-1] + "/" + file
+                        if os.path.isfile(fpath):
+                                return fpath
                 for path in self.include_dirs:
                         fpath = path + "/" + file
                         if os.path.isfile(fpath):

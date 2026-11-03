@@ -1,0 +1,4 @@
+main0
+main1
+@include(subdir/sub_0.txt)
+main2
